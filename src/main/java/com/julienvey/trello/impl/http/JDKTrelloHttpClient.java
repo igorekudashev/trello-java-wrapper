@@ -11,6 +11,8 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Files;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -128,22 +130,37 @@ public class JDKTrelloHttpClient implements TrelloHttpClient {
 
     @Override
     public <T> T postFileForObject(String url, File file, Class<T> responseType, String... params) {
-        try (InputStream in = new BufferedInputStream(Files.newInputStream(file.toPath()))) {
+        try {
+            return postForInputStream(
+                    url,
+                    new BufferedInputStream(Files.newInputStream(file.toPath())),
+                    responseType,
+                    params);
+        } catch (IOException e) {
+            throw new TrelloHttpException(e);
+        }
+    }
+
+    @Override
+    public <T> T postForInputStream(String url, InputStream stream, Class<T> responseType, String... params) {
+        try (stream) {
             HttpURLConnection conn = openConnection(url, params, "POST");
             String boundary = "----" + UUID.randomUUID();
             conn.setRequestProperty("Content-Type", "multipart/form-data; boundary=" + boundary);
 
+            SimpleDateFormat formatter = new SimpleDateFormat("ddMMyyyy HH_mm");
+
             try (OutputStream requestStream = conn.getOutputStream();
                  Writer writer = new OutputStreamWriter(requestStream)) {
                 writer.append(LF).append("--").append(boundary).append(LF)
-                        .append("Content-Disposition: form-data; name=\"file\"; filename=\"" + file.getName() + "\"").append(LF)
+                        .append("Content-Disposition: form-data; name=\"file\"; filename=\"" + formatter.format(new Date()) + "\"").append(LF)
                         .append("Content-Type: application/octet-stream").append(LF)
                         .append("Content-Transfer-Encoding: binary").append(LF)
                         .append(LF);
 
                 writer.flush();
 
-                IOUtils.copyTo(in, requestStream);
+                IOUtils.copyTo(stream, requestStream);
 
                 writer.append(LF).append("--").append(boundary).append("--").append(LF)
                         .flush();

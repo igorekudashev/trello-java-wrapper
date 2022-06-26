@@ -1,66 +1,9 @@
 package com.julienvey.trello.impl;
 
-import static com.julienvey.trello.impl.TrelloUrl.ADD_ATTACHMENT_TO_CARD;
-import static com.julienvey.trello.impl.TrelloUrl.ADD_CHECKITEMS_TO_CHECKLIST;
-import static com.julienvey.trello.impl.TrelloUrl.ADD_COMMENT_TO_CARD;
-import static com.julienvey.trello.impl.TrelloUrl.ADD_EXISTING_LABEL_TO_CARD;
-import static com.julienvey.trello.impl.TrelloUrl.ADD_LABEL_TO_CARD;
-import static com.julienvey.trello.impl.TrelloUrl.ADD_MEMBER_TO_BOARD;
-import static com.julienvey.trello.impl.TrelloUrl.ADD_MEMBER_TO_BOARD_BY_ID;
-import static com.julienvey.trello.impl.TrelloUrl.ADD_MEMBER_TO_CARD;
-import static com.julienvey.trello.impl.TrelloUrl.CREATE_CARD;
-import static com.julienvey.trello.impl.TrelloUrl.CREATE_CHECKLIST;
-import static com.julienvey.trello.impl.TrelloUrl.CREATE_LABEL;
-import static com.julienvey.trello.impl.TrelloUrl.DELETE_ATTACHMENT;
-import static com.julienvey.trello.impl.TrelloUrl.DELETE_CARD;
-import static com.julienvey.trello.impl.TrelloUrl.DELETE_LABEL;
-import static com.julienvey.trello.impl.TrelloUrl.GET_ACTION;
-import static com.julienvey.trello.impl.TrelloUrl.GET_ACTION_BOARD;
-import static com.julienvey.trello.impl.TrelloUrl.GET_ACTION_CARD;
-import static com.julienvey.trello.impl.TrelloUrl.GET_ACTION_ENTITIES;
-import static com.julienvey.trello.impl.TrelloUrl.GET_ACTION_LIST;
-import static com.julienvey.trello.impl.TrelloUrl.GET_ACTION_MEMBER;
-import static com.julienvey.trello.impl.TrelloUrl.GET_ACTION_MEMBER_CREATOR;
-import static com.julienvey.trello.impl.TrelloUrl.GET_ACTION_ORGANIZATION;
-import static com.julienvey.trello.impl.TrelloUrl.GET_BOARD;
-import static com.julienvey.trello.impl.TrelloUrl.GET_BOARD_ACTIONS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_BOARD_CARD;
-import static com.julienvey.trello.impl.TrelloUrl.GET_BOARD_CARDS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_BOARD_CHECKLISTS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_BOARD_LABELS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_BOARD_LISTS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_BOARD_MEMBERS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_BOARD_MEMBERSHIPS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_BOARD_MEMBER_CARDS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_BOARD_MYPREFS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_BOARD_ORGANIZATION;
-import static com.julienvey.trello.impl.TrelloUrl.GET_CARD;
-import static com.julienvey.trello.impl.TrelloUrl.GET_CARD_ACTIONS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_CARD_ATTACHMENT;
-import static com.julienvey.trello.impl.TrelloUrl.GET_CARD_ATTACHMENTS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_CARD_BOARD;
-import static com.julienvey.trello.impl.TrelloUrl.GET_CARD_CHECKLIST;
-import static com.julienvey.trello.impl.TrelloUrl.GET_CARD_MEMBERS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_CHECK_LIST;
-import static com.julienvey.trello.impl.TrelloUrl.GET_LABEL;
-import static com.julienvey.trello.impl.TrelloUrl.GET_LIST;
-import static com.julienvey.trello.impl.TrelloUrl.GET_LIST_CARDS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_MEMBER;
-import static com.julienvey.trello.impl.TrelloUrl.GET_MEMBER_ACTIONS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_MEMBER_BOARDS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_MEMBER_CARDS;
-import static com.julienvey.trello.impl.TrelloUrl.GET_ORGANIZATION;
-import static com.julienvey.trello.impl.TrelloUrl.GET_ORGANIZATION_BOARD;
-import static com.julienvey.trello.impl.TrelloUrl.GET_ORGANIZATION_MEMBER;
-import static com.julienvey.trello.impl.TrelloUrl.REMOVE_MEMBER_FROM_BOARD;
-import static com.julienvey.trello.impl.TrelloUrl.REMOVE_MEMBER_FROM_CARD;
-import static com.julienvey.trello.impl.TrelloUrl.UPDATE_CARD;
-import static com.julienvey.trello.impl.TrelloUrl.UPDATE_CARD_COMMENT;
-import static com.julienvey.trello.impl.TrelloUrl.UPDATE_LABEL;
-import static com.julienvey.trello.impl.TrelloUrl.createUrl;
-import static com.julienvey.trello.impl.TrelloUrl.createUrlWithNoArgs;
-
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -99,6 +42,8 @@ import com.julienvey.trello.domain.TList;
 import com.julienvey.trello.domain.TrelloEntity;
 import com.julienvey.trello.impl.domaininternal.Comment;
 import com.julienvey.trello.impl.http.JDKTrelloHttpClient;
+
+import static com.julienvey.trello.impl.TrelloUrl.*;
 
 public class TrelloImpl implements Trello {
 
@@ -154,6 +99,14 @@ public class TrelloImpl implements Trello {
     @Override
     public List<CheckList> getBoardChecklists(String boardId, Argument... args) {
         return asList(() -> get(createUrl(GET_BOARD_CHECKLISTS).params(args).asString(), CheckList[].class, boardId));
+    }
+
+    @Override
+    public TList createTList(String boardId, TList tlist) {
+        tlist.setIdBoard(boardId);
+        TList createdList = postForObject(createUrl(CREATE_LIST).asString(), tlist, TList.class);
+        createdList.setInternalTrello(this);
+        return createdList;
     }
 
     @Override
@@ -543,8 +496,13 @@ public class TrelloImpl implements Trello {
     }
 
     @Override
-    public void addUrlAttachmentToCard(String idCard, String url) {
-        postForObject(createUrl(ADD_ATTACHMENT_TO_CARD).asString(), new Attachment(url), Attachment.class, idCard);
+    public void addUrlAttachmentToCard(String idCard, String stringUrl) {
+        try {
+            URL url = new URL(stringUrl);
+            postStreamForObject(createUrl(ADD_ATTACHMENT_TO_CARD).asString(), url.openStream(), Attachment.class, idCard);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -564,6 +522,12 @@ public class TrelloImpl implements Trello {
     }
 
     /* internal methods */
+
+    private <T> T postStreamForObject(String url, InputStream inputStream, Class<T> objectClass, String... params) {
+        logger.debug("PostStreamForObject request on Trello API at url {} for class {} with params {}", url,
+                objectClass.getCanonicalName(), params);
+        return httpClient.postForInputStream(url, inputStream, objectClass, params);
+    }
 
     private <T> T postFileForObject(String url, File file, Class<T> objectClass, String... params) {
         logger.debug("PostFileForObject request on Trello API at url {} for class {} with params {}", url,

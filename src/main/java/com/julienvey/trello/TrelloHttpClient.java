@@ -1,15 +1,11 @@
 package com.julienvey.trello;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
 
 import com.julienvey.trello.exception.TrelloHttpException;
-import com.julienvey.trello.impl.http.ApacheHttpClient;
-import com.julienvey.trello.impl.http.AsyncTrelloHttpClient;
-import com.julienvey.trello.impl.http.AsyncTrelloHttpClient2;
 import com.julienvey.trello.impl.http.JDKTrelloHttpClient;
-import com.julienvey.trello.impl.http.OkHttpTrelloHttpClient;
-import com.julienvey.trello.impl.http.RestTemplateHttpClient;
 
 /**
  * The third-party HTTP clients wrapper. Allows to not hardy depend on particular HTTP clients.
@@ -30,11 +26,6 @@ import com.julienvey.trello.impl.http.RestTemplateHttpClient;
  * does not require any additional dependencies.
  *
  * @see JDKTrelloHttpClient
- * @see ApacheHttpClient
- * @see RestTemplateHttpClient
- * @see OkHttpTrelloHttpClient
- * @see AsyncTrelloHttpClient
- * @see AsyncTrelloHttpClient2
  */
 public interface TrelloHttpClient {
     /**
@@ -66,6 +57,21 @@ public interface TrelloHttpClient {
      * @return The converted response.
      */
     <T> T postForObject(String url, Object body, Class<T> responseType, String... params);
+
+    /**
+     * Performs HTTP {@code POST} request and converts response.
+     * <p>
+     * The template variables in {@code url} are expanded using the given {@code params}, if any.
+     *
+     * @param url          The URL to make request to.
+     * @param stream       The object as InputStream
+     * @param responseType The response object class object.
+     * @param params       The URL query part or path parameters that should be expanded.
+     * @param <T>          The response object type.
+     *
+     * @return The converted response.
+     */
+    <T> T postForInputStream(String url, InputStream stream, Class<T> responseType, String... params);
 
     /**
      * Performs HTTP {@code POST} request and returns the value of the {@code Location} header.

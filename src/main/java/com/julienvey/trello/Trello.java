@@ -33,6 +33,8 @@ public interface Trello {
 
     List<CheckList> getBoardChecklists(String boardId, Argument... args);
 
+    TList createTList(String boardId, TList tlist);
+
     List<TList> getBoardLists(String boardId, Argument... args);
 
     List<Label> getBoardLabels(String boardId, Argument... args);
@@ -238,7 +240,7 @@ public interface Trello {
 
     void addAttachmentToCard(String idCard, File file);
 
-    void addUrlAttachmentToCard(String idCard, String url);
+    void addUrlAttachmentToCard(String idCard, String stringUrl);
 
     /**
      * @param idCard       The id of the card.
